@@ -1,0 +1,51 @@
+@keyframes trace-flow {
+  from { stroke-dashoffset: 800; }
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes trace-pulse {
+  0%, 100% { stroke-opacity: 0.3; }
+  50% { stroke-opacity: 1; filter: drop-shadow(0 0 4px var(--trace-green)); }
+}
+
+@keyframes trace-amber-flow {
+  from { stroke-dashoffset: 600; }
+  to { stroke-dashoffset: 0; }
+}
+
+.trace-idle {
+  stroke: var(--trace-dim);
+  stroke-dasharray: 8 4;
+  stroke-opacity: 0.4;
+}
+
+.trace-active {
+  stroke: var(--trace-green);
+  stroke-dasharray: 20 8;
+  animation: trace-flow 2s linear infinite, trace-pulse 3s ease-in-out infinite;
+}
+
+.trace-payment-idle {
+  stroke: var(--trace-amber-dim);
+  stroke-dasharray: 6 6;
+  stroke-opacity: 0.3;
+}
+
+.trace-payment-active {
+  stroke: var(--trace-amber);
+  stroke-dasharray: 16 8;
+  animation: trace-amber-flow 1.5s linear infinite;
+  filter: drop-shadow(0 0 3px var(--trace-amber));
+}
+
+@keyframes spark-in {
+  0% { transform: scale(0); opacity: 1; }
+  100% { transform: scale(1.5); opacity: 0; }
+}
+
+.spark-ring {
+  animation: spark-in 0.6s ease-out forwards;
+  border: 2px solid var(--trace-green);
+  border-radius: 50%;
+  pointer-events: none;
+}

@@ -1,0 +1,43 @@
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 8px var(--chip-glow), 0 0 20px var(--chip-glow); }
+  50% { box-shadow: 0 0 20px var(--chip-glow-strong), 0 0 40px var(--chip-glow-strong), inset 0 0 15px var(--chip-glow); }
+}
+
+@keyframes glow-amber {
+  0%, 100% { box-shadow: 0 0 8px rgba(255,183,0,0.2), 0 0 20px rgba(255,183,0,0.1); }
+  50% { box-shadow: 0 0 20px rgba(255,183,0,0.6), 0 0 40px rgba(255,183,0,0.3); }
+}
+
+@keyframes led-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0.2; }
+}
+
+@keyframes winner-glow {
+  0%, 100% { box-shadow: 0 0 30px rgba(0,255,135,0.5), 0 0 60px rgba(0,255,135,0.3), inset 0 0 30px rgba(0,255,135,0.1); border-color: var(--long-color); }
+  50% { box-shadow: 0 0 60px rgba(0,255,135,0.8), 0 0 100px rgba(0,255,135,0.5), inset 0 0 50px rgba(0,255,135,0.2); }
+}
+
+@keyframes loser-dim {
+  to { opacity: 0.25; filter: grayscale(80%); }
+}
+
+@keyframes board-flash {
+  0% { opacity: 0; }
+  15% { opacity: 0.9; }
+  40% { opacity: 0.6; }
+  70% { opacity: 0.3; }
+  100% { opacity: 0; }
+}
+
+@keyframes countdown-pulse {
+  0%, 100% { color: var(--short-color); text-shadow: 0 0 10px var(--short-color); }
+  50% { color: #ff6b6b; text-shadow: 0 0 20px #ff6b6b, 0 0 40px var(--short-color); }
+}
+
+.chip-active { animation: glow-pulse 3s ease-in-out infinite; }
+.chip-winner { animation: winner-glow 1.5s ease-in-out infinite; }
+.chip-loser { animation: loser-dim 0.6s ease forwards; }
+.led-active { animation: led-blink 1s step-end infinite; }
+.payment-amber { animation: glow-amber 2s ease-in-out infinite; }
+.countdown-critical { animation: countdown-pulse 1s ease-in-out infinite; }

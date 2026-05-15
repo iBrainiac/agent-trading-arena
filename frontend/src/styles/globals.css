@@ -1,0 +1,40 @@
+/* PCB color palette */
+:root {
+  --pcb-bg: #0a0f0a;
+  --pcb-green: #1a2e1a;
+  --pcb-grid: #162216;
+  --trace-green: #00ff41;
+  --trace-dim: #003d10;
+  --trace-amber: #ffb700;
+  --trace-amber-dim: #3d2c00;
+  --chip-bg: #0d1a0d;
+  --chip-border: #00ff41;
+  --chip-border-dim: #1a3d1a;
+  --chip-glow: rgba(0, 255, 65, 0.15);
+  --chip-glow-strong: rgba(0, 255, 65, 0.4);
+  --text-primary: #00ff41;
+  --text-secondary: #7dff9e;
+  --text-dim: #2d6b3d;
+  --text-muted: #1a4028;
+  --long-color: #00ff87;
+  --short-color: #ff4757;
+  --hold-color: #ffd32a;
+  --pnl-positive: #00ff87;
+  --pnl-negative: #ff4757;
+  --font-mono: 'Share Tech Mono', 'Courier New', monospace;
+  --font-display: 'Orbitron', sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body, #root {
+  width: 100%; height: 100%;
+  background: var(--pcb-bg);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  overflow: hidden;
+}
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--pcb-bg); }
+::-webkit-scrollbar-thumb { background: var(--trace-dim); border-radius: 2px; }
