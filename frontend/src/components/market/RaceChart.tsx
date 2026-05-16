@@ -9,14 +9,70 @@ interface Props {
 
 const A_COLOR = '#00ff87';
 const B_COLOR = '#ff4757';
-const PAD = { top: 28, right: 52, bottom: 32, left: 52 };
+const PAD = { top: 44, right: 64, bottom: 36, left: 52 };
+
+function drawJet(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  color: string,
+  glow: number,
+) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.shadowColor = color;
+  ctx.shadowBlur = 14 * glow;
+  ctx.fillStyle = color;
+
+  // Fuselage
+  ctx.beginPath();
+  ctx.moveTo(22, 0);
+  ctx.lineTo(6, -3.5);
+  ctx.lineTo(-10, -3);
+  ctx.lineTo(-18, 0);
+  ctx.lineTo(-10, 3);
+  ctx.lineTo(6, 3.5);
+  ctx.closePath();
+  ctx.fill();
+
+  // Top wing
+  ctx.beginPath();
+  ctx.moveTo(4, -3);
+  ctx.lineTo(-5, -17);
+  ctx.lineTo(-13, -3);
+  ctx.closePath();
+  ctx.fill();
+
+  // Bottom wing
+  ctx.beginPath();
+  ctx.moveTo(4, 3);
+  ctx.lineTo(-5, 17);
+  ctx.lineTo(-13, 3);
+  ctx.closePath();
+  ctx.fill();
+
+  // Tail fin
+  ctx.beginPath();
+  ctx.moveTo(-11, -3);
+  ctx.lineTo(-18, -10);
+  ctx.lineTo(-18, -2);
+  ctx.closePath();
+  ctx.fill();
+
+  // Cockpit highlight
+  ctx.fillStyle = 'rgba(255,255,255,0.35)';
+  ctx.shadowBlur = 0;
+  ctx.beginPath();
+  ctx.ellipse(10, -1, 5, 2, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.restore();
+}
 
 export function RaceChart({ agentA, agentB, market }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rafRef = useRef<number>(0);
   const glowPhase = useRef(0);
-
-  // Stable refs so the RAF loop always sees fresh data without restart
   const dataRef = useRef({ agentA, agentB, market });
   useEffect(() => { dataRef.current = { agentA, agentB, market }; });
 
@@ -24,7 +80,6 @@ export function RaceChart({ agentA, agentB, market }: Props) {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    // Size canvas to parent once
     const parent = canvas.parentElement;
     if (parent) {
       canvas.width = parent.clientWidth;
@@ -60,14 +115,13 @@ export function RaceChart({ agentA, agentB, market }: Props) {
       const timeRange = Math.max(endTs - startTs, 1);
       const now = Math.min(Date.now(), endTs);
 
-      // Y-axis: auto-scale to widest P&L seen, minimum ±1
       const allPnl = [
         ...agentA.pnlHistory.map((p) => p.pnl),
         ...agentB.pnlHistory.map((p) => p.pnl),
         1, -1,
       ];
       const maxAbs = Math.max(...allPnl.map(Math.abs));
-      const yMax = maxAbs * 1.2; // 20% headroom
+      const yMax = maxAbs * 1.2;
 
       const toX = (ts: number) => PAD.left + ((ts - startTs) / timeRange) * cW;
       const toY = (pnl: number) => PAD.top + cH / 2 - (pnl / yMax) * (cH / 2);
@@ -82,7 +136,7 @@ export function RaceChart({ agentA, agentB, market }: Props) {
       ctx.fillStyle = bg;
       ctx.fillRect(PAD.left, PAD.top, cW, cH);
 
-      // Horizontal grid lines
+      // Grid lines
       ctx.strokeStyle = 'rgba(0,255,65,0.06)';
       ctx.lineWidth = 1;
       for (let i = 0; i <= 4; i++) {
@@ -112,19 +166,10 @@ export function RaceChart({ agentA, agentB, market }: Props) {
       ctx.setLineDash([6, 3]);
       ctx.beginPath(); ctx.moveTo(finishX, PAD.top); ctx.lineTo(finishX, PAD.top + cH); ctx.stroke();
       ctx.setLineDash([]);
-      ctx.shadowBlur = 0;
-
-      // Finish label
       ctx.fillStyle = `rgba(255,183,0,${fAlpha + 0.1})`;
       ctx.font = 'bold 9px "Share Tech Mono", monospace';
       ctx.textAlign = 'center';
-      ctx.fillText('FINISH', finishX, PAD.top - 10);
-
-      // Current-time cursor
-      const nowX = toX(now);
-      ctx.strokeStyle = 'rgba(0,255,65,0.12)';
-      ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.moveTo(nowX, PAD.top); ctx.lineTo(nowX, PAD.top + cH); ctx.stroke();
+      ctx.fillText('FINISH', finishX, PAD.top - 14);
 
       // Progress bar along bottom
       ctx.fillStyle = 'rgba(0,255,65,0.08)';
@@ -132,8 +177,8 @@ export function RaceChart({ agentA, agentB, market }: Props) {
       ctx.strokeStyle = 'rgba(0,255,65,0.15)';
       ctx.strokeRect(PAD.left, PAD.top + cH + 4, cW, 3);
 
-      // Draw a P&L line
-      function drawLine(
+      // Draw trail + exhaust + jet for one agent
+      function drawAgent(
         history: { ts: number; pnl: number }[],
         color: string,
         label: string,
@@ -141,50 +186,67 @@ export function RaceChart({ agentA, agentB, market }: Props) {
       ) {
         if (!ctx) return;
         const points = history.length > 0 ? history : [{ ts: startTs, pnl: 0 }];
+        const head = points[points.length - 1];
+        const jetX = toX(head.ts);
+        const jetY = toY(head.pnl);
 
-        // Smooth bezier path
-        ctx.beginPath();
-        ctx.moveTo(toX(points[0].ts), toY(points[0].pnl));
-        for (let i = 1; i < points.length; i++) {
-          const prev = points[i - 1];
-          const curr = points[i];
-          const cpx = (toX(prev.ts) + toX(curr.ts)) / 2;
-          ctx.bezierCurveTo(cpx, toY(prev.pnl), cpx, toY(curr.pnl), toX(curr.ts), toY(curr.pnl));
+        // Exhaust trail — fades from transparent at start to visible near jet
+        if (points.length > 1) {
+          const grad = ctx.createLinearGradient(
+            toX(points[0].ts), 0,
+            jetX, 0,
+          );
+          grad.addColorStop(0, `${color}00`);
+          grad.addColorStop(0.5, `${color}22`);
+          grad.addColorStop(1, `${color}99`);
+
+          ctx.beginPath();
+          ctx.moveTo(toX(points[0].ts), toY(points[0].pnl));
+          for (let i = 1; i < points.length; i++) {
+            const prev = points[i - 1];
+            const curr = points[i];
+            const cpx = (toX(prev.ts) + toX(curr.ts)) / 2;
+            ctx.bezierCurveTo(cpx, toY(prev.pnl), cpx, toY(curr.pnl), toX(curr.ts), toY(curr.pnl));
+          }
+          ctx.shadowColor = color;
+          ctx.shadowBlur = 3;
+          ctx.strokeStyle = grad;
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+          ctx.shadowBlur = 0;
         }
 
-        ctx.shadowColor = color;
-        ctx.shadowBlur = 6;
-        ctx.strokeStyle = color;
-        ctx.lineWidth = 2.5;
-        ctx.stroke();
-        ctx.shadowBlur = 0;
+        // Exhaust particles behind jet
+        for (let i = 0; i < 6; i++) {
+          const offset = (i + 1) * 7;
+          const alpha = (1 - i / 6) * 0.55 * (0.8 + 0.2 * gsin);
+          const spread = (Math.sin(glowPhase.current * 3 + i * 1.2)) * 3;
+          const size = Math.max(0.5, 2 - i * 0.25);
+          ctx.beginPath();
+          ctx.arc(jetX - offset, jetY + spread, size, 0, Math.PI * 2);
+          ctx.fillStyle = `${color}${Math.round(alpha * 255).toString(16).padStart(2, '0')}`;
+          ctx.fill();
+        }
 
-        // Glowing dot at head
-        const head = points[points.length - 1];
-        const hx = toX(head.ts);
-        const hy = toY(head.pnl);
-        const dotPulse = 0.7 + 0.3 * gsin;
+        // Jet
+        const pulse = 0.75 + 0.25 * gsin;
+        drawJet(ctx, jetX, jetY, color, pulse);
 
-        ctx.shadowColor = color;
-        ctx.shadowBlur = 14 * dotPulse;
-        ctx.beginPath();
-        ctx.arc(hx, hy, 5, 0, Math.PI * 2);
-        ctx.fillStyle = color;
-        ctx.fill();
-        ctx.shadowBlur = 0;
-
-        // Label beside dot
+        // Label
         const sign = currentPnl >= 0 ? '+' : '';
         const labelText = `${label}  ${sign}$${currentPnl.toFixed(2)}`;
         ctx.font = 'bold 9px "Share Tech Mono", monospace';
         ctx.fillStyle = color;
-        ctx.textAlign = hx > W * 0.6 ? 'right' : 'left';
-        const lx = hx + (hx > W * 0.6 ? -10 : 10);
-        ctx.fillText(labelText, lx, hy - 10);
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 8;
+        ctx.textAlign = jetX > W * 0.65 ? 'right' : 'left';
+        const lx = jetX + (jetX > W * 0.65 ? -32 : 32);
+        ctx.fillText(labelText, lx, jetY - 22);
+        ctx.shadowBlur = 0;
       }
 
-      drawLine(agentA.pnlHistory, A_COLOR, agentA.displayName, agentA.currentPnl);
-      drawLine(agentB.pnlHistory, B_COLOR, agentB.displayName, agentB.currentPnl);
+      drawAgent(agentA.pnlHistory, A_COLOR, agentA.displayName, agentA.currentPnl);
+      drawAgent(agentB.pnlHistory, B_COLOR, agentB.displayName, agentB.currentPnl);
 
       // Winner banner when resolved
       if (market.winner) {
@@ -211,7 +273,7 @@ export function RaceChart({ agentA, agentB, market }: Props) {
       cancelAnimationFrame(rafRef.current);
       ro.disconnect();
     };
-  }, []); // one long-running loop; reads fresh data from dataRef
+  }, []);
 
   return (
     <canvas

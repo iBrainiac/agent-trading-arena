@@ -115,7 +115,14 @@ function CreateArenaForm({ initial, onCreated, isRematch }: CreateFormProps) {
               style={inputStyle}
               type="number"
               value={cfg.targetPrice}
-              onChange={(e) => setCfg((c) => ({ ...c, targetPrice: Number(e.target.value) }))}
+              onChange={(e) => {
+                const price = Number(e.target.value);
+                setCfg((c) => ({
+                  ...c,
+                  targetPrice: price,
+                  question: `Will ETH be above $${price.toLocaleString()}?`,
+                }));
+              }}
             />
           </div>
 

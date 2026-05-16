@@ -30,7 +30,7 @@ async function payEntryFeeForAgent(agentId: AgentId): Promise<void> {
     maxAmountRequired: market.entryFeeMinimal,
   });
 
-  const cmd = `onchainos payment pay --accepts '${acceptsJson}' --wallet ${agent.walletAddress} --amount ${market.entryFeeMinimal}`;
+  const cmd = `onchainos payment pay --accepts '${acceptsJson}' --from ${agent.walletAddress}`;
   logger.info(`x402 entry payment for ${agentId}`);
 
   const output = await runCmd(cmd);
