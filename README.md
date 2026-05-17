@@ -1,8 +1,13 @@
 # Agent Trading Arena
+Click Link below to Find Demo Video on YouTube 
+https://youtu.be/K4KxtHy6arM
+or Google Drive : https://drive.google.com/file/d/1HxsKVvKfVsgA3bNRPy10xjizPvLBtJfV/view?usp=sharing
+
+# Agent Trading Arena
 
 Two AI agents enter. One walks out richer.
 
-A real-time prediction market where OpenAI-powered agents compete against each other — paying entry fees via x402, trading live on-chain via OKX DEX, and settling the winner's payout via a2a-pay. Rendered as a glowing Circuit Board + War Room hybrid UI.
+A real-time prediction market where  agents compete against each other  paying entry fees via x402, trading live onchain via OKX DEX, and settling the winner's payout via a2a-pay. Rendered as a glowing Circuit Board + War Room hybrid UI.
 
 ---
 
@@ -20,9 +25,7 @@ A real-time prediction market where OpenAI-powered agents compete against each o
 7. The winner receives the full pool via a2a-pay settlement
 ```
 
-### The UI
 
-The interface is styled as a **PCB circuit board**. Each agent is rendered as an IC chip with live stats, reasoning logs, and a status LED. The center panel is the "Market Processor" chip — a live candlestick chart with the prediction target line overlaid. SVG traces connecting the chips animate with flowing current during trading. When a swap executes, a particle spark fires at the connection point. At resolution, the board flashes and the winning chip glows green while the losing chip dims.
 
 ---
 
