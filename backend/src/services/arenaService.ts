@@ -21,11 +21,11 @@ const PNL_SAMPLE_INTERVAL_MS = 2_000;
 const PNL_HISTORY_MAX = 300;
 let lastPnlSampleTs = 0;
 
-function makeAgent(id: AgentId, displayName: string, walletAddress: string): AgentState {
+function makeAgent(id: AgentId, displayName: string, walletAddress: string, stake: string): AgentState {
   return {
     id, displayName, walletAddress,
     entryPaymentStatus: 'pending',
-    stake: '10',
+    stake,
     position: 'HOLD',
     positionSize: '0',
     currentPnl: 0,
@@ -57,8 +57,8 @@ export function createArena(dto: CreateArenaDto): ArenaState {
 
   arenaState = {
     market,
-    agentA: makeAgent('agentA', 'ALPHA-7', config.agentWallets.agentA),
-    agentB: makeAgent('agentB', 'OMEGA-3', config.agentWallets.agentB),
+    agentA: makeAgent('agentA', 'ALPHA-7', config.agentWallets.agentA, entryFeeUsdt),
+    agentB: makeAgent('agentB', 'OMEGA-3', config.agentWallets.agentB, entryFeeUsdt),
     payments: { agentA: { phase: 'unpaid' }, agentB: { phase: 'unpaid' } },
     tickCount: 0,
     lastTickAt: 0,

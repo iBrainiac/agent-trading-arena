@@ -7,6 +7,7 @@ import { AgentChip } from './components/agent/AgentChip';
 import { MarketProcessor } from './components/market/MarketProcessor';
 import { PaymentTrace } from './components/payment/PaymentTrace';
 import { BoardFlash } from './components/fx/BoardFlash';
+import { LandingPage } from './components/layout/LandingPage';
 import type { ArenaFormConfig } from './types/arena';
 import './styles/globals.css';
 import './styles/glow.css';
@@ -203,7 +204,7 @@ function ConnectionBadge({ connected }: { connected: boolean }) {
   );
 }
 
-type AppScreen = 'form' | 'waiting' | 'arena';
+type AppScreen = 'landing' | 'form' | 'waiting' | 'arena';
 
 export default function App() {
   useArenaWs();
@@ -215,13 +216,13 @@ export default function App() {
   const setLastConfig = useArenaStore((s) => s.setLastConfig);
   const clearArena = useArenaStore((s) => s.clearArena);
 
-  const [screen, setScreen] = useState<AppScreen>('form');
+  const [screen, setScreen] = useState<AppScreen>('landing');
   const [isRematch, setIsRematch] = useState(false);
 
   // When WS pushes arena data, move to arena screen
   if (arena && screen === 'waiting') setScreen('arena');
-  // If arena was cleared externally (ARENA_RESET), return to form
-  if (!arena && screen === 'arena') setScreen('form');
+  // If arena was cleared externally (ARENA_RESET), return to landing
+  if (!arena && screen === 'arena') setScreen('landing');
 
   async function handleCreated(cfg: ArenaFormConfig) {
     setLastConfig(cfg);
@@ -233,7 +234,7 @@ export default function App() {
     await callReset();
     clearArena();
     setIsRematch(false);
-    setScreen('form');
+    setScreen('landing');
   }
 
   async function handleRematch() {
@@ -244,6 +245,10 @@ export default function App() {
   }
 
   const isTrading = arena?.market.phase === 'TRADING';
+
+  if (screen === 'landing') {
+    return <LandingPage onEnter={() => setScreen('form')} />;
+  }
 
   return (
     <CircuitBoard>
